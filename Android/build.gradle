@@ -175,6 +175,8 @@ android {
                 case "debug":
                     switch (flavorName) {
                         case "dev":
+                        case "beta":
+                        case "prod":
                             ignoreVariant = false
                             break
                     }
@@ -189,7 +191,7 @@ android {
         dev {
             applicationIdSuffix ".debug"
             resValue "string", "app_title", "Tower Dev"
-            resValue "string", "baidu_api_key", ""
+            resValue "string", "baidu_api_key", "K4I5deAWO5k7kLdfnCCiuZtXNZQ3rc12"
             versionName generateVersionName(versionPrefix, versionMajor, versionMinor, versionPatch, "debug.${versionBuild}")
 
             //Enable or disable crashlytics based on the availability of the api key
