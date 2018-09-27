@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.o3dr.android.client.Drone;
+import com.o3dr.services.android.lib.model.IDroneApi;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.droidplanner.android.R;
@@ -15,6 +17,11 @@ import org.droidplanner.android.fragments.FlightDataFragment;
 import org.droidplanner.android.fragments.WidgetsListFragment;
 import org.droidplanner.android.fragments.actionbar.ActionBarTelemFragment;
 import org.droidplanner.android.utils.Utils;
+import org.droidplanner.services.android.impl.core.MAVLink.MavLinkRC;
+import org.droidplanner.services.android.impl.core.drone.autopilot.MavLinkDrone;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanelLayout.PanelSlideListener {
 
@@ -34,9 +41,20 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
     @Override
     public void onDrawerOpened() {
         super.onDrawerOpened();
-
         if (flightData != null)
             flightData.onDrawerOpened();
+        Drone drone = dpApp.getDrone();
+        MavLinkDrone mavLinkDrone = null;
+        try {
+            Field field = drone.getClass().getDeclaredField("droneApiRef");
+            field.setAccessible(true);
+            mavLinkDrone = (MavLinkDrone) ((AtomicReference<IDroneApi>) field.get(drone)).get();
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        if(mavLinkDrone!=null)
+            MavLinkRC.sendRcOverrideMsg(mavLinkDrone,new int[]{0,0,0,0,0,0,0,0});
     }
 
     @Override
