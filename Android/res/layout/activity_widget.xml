@@ -6,6 +6,7 @@
     <include
         android:id="@+id/actionbar_container"
         layout="@layout/actionbar_toolbar"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
