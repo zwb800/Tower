@@ -4,10 +4,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.MAVLink.MAVLinkPacket;
+import com.MAVLink.Messages.MAVLinkMessage;
+import com.MAVLink.Messages.MAVLinkPayload;
+import com.MAVLink.common.msg_rc_channels_override;
 import com.o3dr.android.client.Drone;
+import com.o3dr.android.client.apis.ExperimentalApi;
+import com.o3dr.services.android.lib.mavlink.MavlinkMessageWrapper;
 import com.o3dr.services.android.lib.model.IDroneApi;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -44,17 +51,34 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
         if (flightData != null)
             flightData.onDrawerOpened();
         Drone drone = dpApp.getDrone();
-        MavLinkDrone mavLinkDrone = null;
-        try {
-            Field field = drone.getClass().getDeclaredField("droneApiRef");
-            field.setAccessible(true);
-            mavLinkDrone = (MavLinkDrone) ((AtomicReference<IDroneApi>) field.get(drone)).get();
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+//        MavLinkDrone mavLinkDrone = null;
+//        try {
+//            Field field = drone.getClass().getDeclaredField("droneApiRef");
+//            field.setAccessible(true);
+//            mavLinkDrone = (MavLinkDrone) ((AtomicReference<IDroneApi>) field.get(drone)).get();
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
+//
+//        if(mavLinkDrone!=null)
+//            MavLinkRC.sendRcOverrideMsg(mavLinkDrone,new int[]{0,0,0,0,0,0,0,0});
 
-        if(mavLinkDrone!=null)
-            MavLinkRC.sendRcOverrideMsg(mavLinkDrone,new int[]{0,0,0,0,0,0,0,0});
+        //另一种方式 不使用反射
+        sendRcOverrideMsg(drone,new int[]{0,0,0,0,0,0,0,0});
+        Log.d(FlightActivity.class.getSimpleName(),"发送RC Override");
+    }
+
+    public static void sendRcOverrideMsg(Drone drone, int[] rcOutputs) {
+        msg_rc_channels_override msg = new msg_rc_channels_override();
+        msg.chan1_raw = (short) rcOutputs[0];
+        msg.chan2_raw = (short) rcOutputs[1];
+        msg.chan3_raw = (short) rcOutputs[2];
+        msg.chan4_raw = (short) rcOutputs[3];
+        msg.chan5_raw = (short) rcOutputs[4];
+        msg.chan6_raw = (short) rcOutputs[5];
+        msg.chan7_raw = (short) rcOutputs[6];
+        msg.chan8_raw = (short) rcOutputs[7];
+        ExperimentalApi.getApi(drone).sendMavlinkMessage(new MavlinkMessageWrapper(msg));
     }
 
     @Override
