@@ -22,7 +22,8 @@ abstract class BaseVideoWidget : TowerWidget() {
         when (videoType) {
             WidgetVideoPreferences.SOLO_VIDEO_TYPE -> {
                 Timber.d("Starting video stream with tag %s", tag)
-                SoloCameraApi.getApi(drone).startVideoStream(surface, tag, listener)
+//                SoloCameraApi.getApi(drone).startVideoStream(surface, tag, listener)
+                listener!!.onSuccess() //测试代码
             }
 
             WidgetVideoPreferences.CUSTOM_VIDEO_TYPE -> {

@@ -104,6 +104,10 @@ public class FullWidgetSoloLinkVideo : BaseVideoWidget() {
         view?.findViewById<View>(R.id.sololink_gimbal_joystick)
     }
 
+    private val touchCircleImage2 by lazy(LazyThreadSafetyMode.NONE) {
+        view?.findViewById<View>(R.id.sololink_gimbal_joystick2)
+    }
+
     private val orientationListener = object : GimbalApi.GimbalOrientationListener {
         override fun onGimbalOrientationUpdate(orientation: GimbalApi.GimbalOrientation) {
         }
@@ -256,6 +260,9 @@ public class FullWidgetSoloLinkVideo : BaseVideoWidget() {
                     var startX: Float = 0f
                     var startY: Float = 0f
 
+                    var startX2: Float = 0f
+                    var startY2: Float = 0f
+
                     override fun onTouch(view: View, event: MotionEvent): Boolean {
                         return moveCopter(view, event)
                     }
@@ -284,6 +291,10 @@ public class FullWidgetSoloLinkVideo : BaseVideoWidget() {
                         val xTouch = event.x
                         val yTouch = event.y
 
+                        var index = (event.action and MotionEvent.ACTION_POINTER_INDEX_MASK) shr MotionEvent.ACTION_POINTER_INDEX_SHIFT
+                        val id = event.getPointerId(index)
+
+
                         val touchWidth = touchCircleImage?.width ?: 0
                         val touchHeight = touchCircleImage?.height ?: 0
                         val centerTouchX = (touchWidth / 2f).toFloat()
@@ -301,12 +312,36 @@ public class FullWidgetSoloLinkVideo : BaseVideoWidget() {
                                 startY = event.y
                                 return true
                             }
+                            MotionEvent.ACTION_POINTER_DOWN ->{
+                                val xTouch2 = event.getX(id)
+                                val yTouch2 = event.getY(id)
+                                touchCircleImage2?.setVisibility(View.VISIBLE)
+                                touchCircleImage2?.setX(xTouch2 - centerTouchX)
+                                touchCircleImage2?.setY(yTouch2 - centerTouchY)
+                                startX2 = xTouch2
+                                startY2 = yTouch2
+                            }
                             MotionEvent.ACTION_MOVE -> {
                                 val yawRotateTo = yawRotateTo(view, event).toFloat()
                                 sendYawAndPitch(view, event, yawRotateTo)
-                                touchCircleImage?.setVisibility(View.VISIBLE)
-                                touchCircleImage?.setX(xTouch - centerTouchX)
-                                touchCircleImage?.setY(yTouch - centerTouchY)
+
+                                for (i in 0 until event.pointerCount)
+                                {
+                                    val xTouch2 = event.getX(i)
+                                    val yTouch2 = event.getY(i)
+                                    if(i==0)
+                                    {
+                                        touchCircleImage?.setX(xTouch2 - centerTouchX)
+                                        touchCircleImage?.setY(yTouch2 - centerTouchY)
+                                    }
+                                    else if(i==1)
+                                    {
+                                        touchCircleImage2?.setX(xTouch2 - centerTouchX)
+                                        touchCircleImage2?.setY(yTouch2 - centerTouchY)
+                                    }
+
+                                }
+
                                 return true
                             }
                             MotionEvent.ACTION_UP -> {
